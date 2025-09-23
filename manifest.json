@@ -1,0 +1,9 @@
+{
+  "name": "Car Parking Tracker",
+  "short_name": "Parking",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#007aff",
+  "icons": []
+}
