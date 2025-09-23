@@ -14,9 +14,10 @@
       color: #f1f1f1;
     }
     h1 { 
-      font-size: 1.8rem; 
+      font-size: 1.5rem; /* smaller so it fits on one line on mobile */
       text-align: center;
       margin-bottom: 20px;
+      white-space: nowrap;
     }
     .card {
       background: #1e1e1e;
@@ -71,11 +72,10 @@
 
     .floor-buttons button.active {
       outline: 3px solid #fff;
-      opacity: 1; /* make active button fully visible */
+      opacity: 1; /* active button fully visible */
     }
 
     /* Unique colors */
-    .floor-1 { background-color: #ff6f61; } /* Red */
     .floor-2 { background-color: #6b5b95; } /* Purple */
     .floor-3 { background-color: #88b04b; } /* Green */
     .floor-4 { background-color: #ffa500; } /* Orange */
@@ -88,9 +88,8 @@
   <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
-    <label>Select Floor</label>
+    <label>Car is on</label>
     <div id="floor-buttons" class="floor-buttons">
-      <button class="floor-1" onclick="setFloor(1)">1</button>
       <button class="floor-2" onclick="setFloor(2)">2</button>
       <button class="floor-3" onclick="setFloor(3)">3</button>
       <button class="floor-4" onclick="setFloor(4)">4</button>
@@ -108,7 +107,7 @@
   <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
@@ -151,7 +150,7 @@
         }
       });
 
-      // Clear comment input when a new floor is chosen
+      // Clear comment input
       document.getElementById("comment").value = "";
 
       const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
@@ -164,6 +163,18 @@
         updatedAt: updatedAt
       });
     }
+
+    // Save comment live as user types
+    document.getElementById("comment").addEventListener("input", async (e) => {
+      if (!selectedFloor) return;
+      const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
+      const updatedAt = new Date();
+      await updateDoc(docRef, {
+        comment: e.target.value,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+    });
 
     // Real-time updates
     onSnapshot(docRef, (snap) => {
@@ -181,6 +192,9 @@
             btn.classList.remove("active");
           }
         });
+
+        // Keep comment field in sync
+        document.getElementById("comment").value = data.comment || "";
       } else {
         lastUpdate.textContent = "No updates yet.";
       }
