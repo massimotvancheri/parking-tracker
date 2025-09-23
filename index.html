@@ -95,9 +95,9 @@
   <script type="module">
     // Import Firebase from CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // 🔑 Your Firebase config (from Firebase Console)
+    // 🔑 Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
       authDomain: "parking-tracker-a0f43.firebaseapp.com",
@@ -146,13 +146,10 @@
         updatedBy: updatedBy,
         updatedAt: updatedAt
       });
-
-      loadLocation();
     }
 
-    // Load from Firestore
-    async function loadLocation() {
-      const snap = await getDoc(docRef);
+    // Real-time listener
+    onSnapshot(docRef, (snap) => {
       const currentDiv = document.getElementById("current");
       if (snap.exists()) {
         const data = snap.data();
@@ -164,9 +161,7 @@
       } else {
         currentDiv.innerHTML = "No parking record yet.";
       }
-    }
-
-    loadLocation();
+    });
   </script>
 </body>
 </html>
