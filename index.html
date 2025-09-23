@@ -38,34 +38,33 @@
     button:hover { background: #005ecb; }
     .note { color: gray; font-size: 0.9rem; }
 
-.floor-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0;
-}
+    .floor-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+    }
 
-.floor-buttons button {
-  flex: 1 1 30%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  background: #eee;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+    .floor-buttons button {
+      flex: 1 1 30%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      background: #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
 
-.floor-buttons button:hover {
-  background: #ddd;
-}
+    .floor-buttons button:hover {
+      background: #ddd;
+    }
 
-.floor-buttons button.active {
-  background: #007aff;
-  color: white;
-  font-weight: bold;
-}
-
+    .floor-buttons button.active {
+      background: #007aff;
+      color: white;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -92,9 +91,29 @@
     <button onclick="saveLocation()">Save Location</button>
   </div>
 
+  <!-- Firebase + Firestore -->
   <script type="module">
+    // Import Firebase libraries
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // 🔑 Replace with your Firebase config (from Firebase Console)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "parking", "car");
+
     let selectedFloor = null;
-    
+
     function setFloor(floor) {
       selectedFloor = floor;
     
@@ -131,6 +150,20 @@
       loadLocation();
     }
 
+    async function loadLocation() {
+      const snap = await getDoc(docRef);
+      const currentDiv = document.getElementById("current");
+      if (snap.exists()) {
+        const data = snap.data();
+        currentDiv.innerHTML = `
+          <strong>Floor ${data.floor}</strong><br>
+          ${data.comment ? "Note: " + data.comment + "<br>" : ""}
+          <span class="note">Updated by ${data.updatedBy} at ${new Date(data.updatedAt.seconds*1000).toLocaleString()}</span>
+        `;
+      } else {
+        currentDiv.innerHTML = "No parking record yet.";
+      }
+    }
 
     loadLocation();
   </script>
