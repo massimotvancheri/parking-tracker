@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Parking Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 { font-size: 1.5rem; }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    select, input, button {
+      font-size: 1rem;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    button {
+      background: #007aff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #005ecb; }
+    .note { color: gray; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>🚗 Car Parking Tracker</h1>
+  <div class="card" id="current">
+    Loading current location...
+  </div>
+
+  <div class="card">
+    <label for="floor">Select Floor</label>
+    <select id="floor">
+      <option value="1">Floor 1</option>
+      <option value="2">Floor 2</option>
+      <option value="3">Floor 3</option>
+      <option value="4">Floor 4</option>
+      <option value="5">Floor 5</option>
+      <option value="6">Floor 6</option>
+    </select>
+
+    <label for="comment">Optional Comment</label>
+    <input type="text" id="comment" placeholder="e.g. outside garage">
+
+    <button onclick="saveLocation()">Save Location</button>
+  </div>
+
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // 🔑 Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "parking", "car");
+
+    async function loadLocation() {
+      const snap = await getDoc(docRef);
+      const currentDiv = document.getElementById("current");
+      if (snap.exists()) {
+        const data = snap.data();
+        currentDiv.innerHTML = `
+          <strong>Floor ${data.floor}</strong><br>
+          ${data.comment ? "Note: " + data.comment + "<br>" : ""}
+          <span class="note">Updated by ${data.updatedBy} at ${new Date(data.updatedAt.seconds*1000).toLocaleString()}</span>
+        `;
+      } else {
+        currentDiv.innerHTML = "No parking record yet.";
+      }
+    }
+
+    async function saveLocation() {
+      const floor = document.getElementById("floor").value;
+      const comment = document.getElementById("comment").value;
+      const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
+      const updatedAt = new Date();
+
+      await setDoc(docRef, {
+        floor: floor,
+        comment: comment,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+
+      loadLocation();
+    }
+
+    loadLocation();
+  </script>
+</body>
+</html>
