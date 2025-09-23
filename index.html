@@ -21,7 +21,7 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
-    select, input, button {
+    input, button {
       font-size: 1rem;
       margin-top: 10px;
       padding: 10px;
@@ -90,79 +90,83 @@
   
     <button onclick="saveLocation()">Save Location</button>
   </div>
-<script type="module">
-  // Import Firebase from CDN (works in plain HTML)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
-    authDomain: "parking-tracker-a0f43.firebaseapp.com",
-    projectId: "parking-tracker-a0f43",
-    storageBucket: "parking-tracker-a0f43.appspot.com",
-    messagingSenderId: "807627988635",
-    appId: "1:807627988635:web:96653e2887c6b2778cb03e"
-  };
+  <!-- Firebase + Firestore -->
+  <script type="module">
+    // Import Firebase from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // Initialize Firebase + Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const docRef = doc(db, "parking", "car");
+    // 🔑 Your Firebase config (from Firebase Console)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
+      authDomain: "parking-tracker-a0f43.firebaseapp.com",
+      projectId: "parking-tracker-a0f43",
+      storageBucket: "parking-tracker-a0f43.appspot.com",
+      messagingSenderId: "807627988635",
+      appId: "1:807627988635:web:96653e2887c6b2778cb03e"
+    };
 
-  let selectedFloor = null;
+    // Init Firebase + Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "parking", "car");
 
-  function setFloor(floor) {
-    selectedFloor = floor;
-    const buttons = document.querySelectorAll("#floor-buttons button");
-    buttons.forEach(btn => {
-      if (btn.textContent == floor) {
-        btn.classList.add("active");
-      } else if (floor === "Other" && btn.textContent === "Other") {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
-    });
-  }
+    let selectedFloor = null;
 
-  async function saveLocation() {
-    if (!selectedFloor) {
-      alert("Please select a floor first!");
-      return;
+    // Select floor + highlight active button
+    window.setFloor = function(floor) {
+      selectedFloor = floor;
+      const buttons = document.querySelectorAll("#floor-buttons button");
+      buttons.forEach(btn => {
+        if (btn.textContent == floor) {
+          btn.classList.add("active");
+        } else if (floor === "Other" && btn.textContent === "Other") {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
     }
 
-    const comment = document.getElementById("comment").value;
-    const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
-    const updatedAt = new Date();
+    // Save to Firestore
+    window.saveLocation = async function() {
+      if (!selectedFloor) {
+        alert("Please select a floor first!");
+        return;
+      }
 
-    await setDoc(docRef, {
-      floor: selectedFloor,
-      comment: comment,
-      updatedBy: updatedBy,
-      updatedAt: updatedAt
-    });
+      const comment = document.getElementById("comment").value;
+      const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
+      const updatedAt = new Date();
+
+      await setDoc(docRef, {
+        floor: selectedFloor,
+        comment: comment,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+
+      loadLocation();
+    }
+
+    // Load from Firestore
+    async function loadLocation() {
+      const snap = await getDoc(docRef);
+      const currentDiv = document.getElementById("current");
+      if (snap.exists()) {
+        const data = snap.data();
+        currentDiv.innerHTML = `
+          <strong>Floor ${data.floor}</strong><br>
+          ${data.comment ? "Note: " + data.comment + "<br>" : ""}
+          <span class="note">Updated by ${data.updatedBy} at ${new Date(data.updatedAt.seconds*1000).toLocaleString()}</span>
+        `;
+      } else {
+        currentDiv.innerHTML = "No parking record yet.";
+      }
+    }
 
     loadLocation();
-  }
-
-  async function loadLocation() {
-    const snap = await getDoc(docRef);
-    const currentDiv = document.getElementById("current");
-    if (snap.exists()) {
-      const data = snap.data();
-      currentDiv.innerHTML = `
-        <strong>Floor ${data.floor}</strong><br>
-        ${data.comment ? "Note: " + data.comment + "<br>" : ""}
-        <span class="note">Updated by ${data.updatedBy} at ${new Date(data.updatedAt.seconds*1000).toLocaleString()}</span>
-      `;
-    } else {
-      currentDiv.innerHTML = "No parking record yet.";
-    }
-  }
-
-  loadLocation();
-</script>
-  
+  </script>
 </body>
 </html>
