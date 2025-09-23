@@ -3,101 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Car Parking Tracker</title>
+  <title>Teemo Parking Tracker ❤️</title>
   <link rel="manifest" href="manifest.json">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #f9f9f9;
-      color: #333;
+      background: #121212; /* Dark mode background */
+      color: #f1f1f1;
     }
-    h1 { font-size: 1.5rem; }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    h1 { 
+      font-size: 1.8rem; 
+      text-align: center;
       margin-bottom: 20px;
     }
-    input, button {
+    .card {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+    }
+    input {
       font-size: 1rem;
       margin-top: 10px;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #444;
       width: 100%;
+      background: #2a2a2a;
+      color: #f1f1f1;
     }
-    button {
-      background: #007aff;
-      color: white;
-      border: none;
-      cursor: pointer;
+    .note { 
+      color: #aaa; 
+      font-size: 0.9rem; 
+      text-align: center;
+      margin-top: 20px;
+      display: block;
     }
-    button:hover { background: #005ecb; }
-    .note { color: gray; font-size: 0.9rem; }
 
+    /* Floor buttons */
     .floor-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 10px 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
     }
 
     .floor-buttons button {
-      flex: 1 1 30%;
-      padding: 12px;
+      padding: 30px;
       border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      background: #eee;
+      border-radius: 16px;
+      font-size: 1.4rem;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
+      color: #fff;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
     .floor-buttons button:hover {
-      background: #ddd;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
     }
 
     .floor-buttons button.active {
-      background: #007aff;
-      color: white;
-      font-weight: bold;
+      outline: 3px solid #fff;
     }
+
+    /* Unique colors from your palette */
+    .floor-1 { background-color: #ff6f61; } /* Red */
+    .floor-2 { background-color: #6b5b95; } /* Purple */
+    .floor-3 { background-color: #88b04b; } /* Green */
+    .floor-4 { background-color: #ffa500; } /* Orange */
+    .floor-5 { background-color: #009688; } /* Teal */
+    .floor-6 { background-color: #1e90ff; } /* Blue */
+    .floor-other { background-color: #ff69b4; } /* Pink */
   </style>
 </head>
 <body>
-  <h1>🚗 Car Parking Tracker</h1>
-  <div class="card" id="current">
-    Loading current location...
-  </div>
+  <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
     <label>Select Floor</label>
     <div id="floor-buttons" class="floor-buttons">
-      <button onclick="setFloor(1)">1</button>
-      <button onclick="setFloor(2)">2</button>
-      <button onclick="setFloor(3)">3</button>
-      <button onclick="setFloor(4)">4</button>
-      <button onclick="setFloor(5)">5</button>
-      <button onclick="setFloor(6)">6</button>
-      <button onclick="setFloor('Other')">Other</button>
+      <button class="floor-1" onclick="setFloor(1)">1</button>
+      <button class="floor-2" onclick="setFloor(2)">2</button>
+      <button class="floor-3" onclick="setFloor(3)">3</button>
+      <button class="floor-4" onclick="setFloor(4)">4</button>
+      <button class="floor-5" onclick="setFloor(5)">5</button>
+      <button class="floor-6" onclick="setFloor(6)">6</button>
+      <button class="floor-other" onclick="setFloor('Other')">Other</button>
     </div>
   
     <label for="comment">Optional Comment</label>
     <input type="text" id="comment" placeholder="e.g. outside garage">
-  
-    <button onclick="saveLocation()">Save Location</button>
   </div>
+
+  <span id="lastUpdate" class="note">No updates yet.</span>
 
   <!-- Firebase + Firestore -->
   <script type="module">
-    // Import Firebase from CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // 🔑 Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
       authDomain: "parking-tracker-a0f43.firebaseapp.com",
@@ -107,34 +116,36 @@
       appId: "1:807627988635:web:96653e2887c6b2778cb03e"
     };
 
-    // Init Firebase + Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const docRef = doc(db, "parking", "car");
 
     let selectedFloor = null;
 
-    // Select floor + highlight active button
-    window.setFloor = function(floor) {
+    // Format date to 24hr time
+    function formatDate(date) {
+      return date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+    }
+
+    // Select floor
+    window.setFloor = async function(floor) {
       selectedFloor = floor;
+
       const buttons = document.querySelectorAll("#floor-buttons button");
       buttons.forEach(btn => {
-        if (btn.textContent == floor) {
-          btn.classList.add("active");
-        } else if (floor === "Other" && btn.textContent === "Other") {
+        if (btn.textContent == floor || (floor === "Other" && btn.textContent === "Other")) {
           btn.classList.add("active");
         } else {
           btn.classList.remove("active");
         }
       });
-    }
-
-    // Save to Firestore
-    window.saveLocation = async function() {
-      if (!selectedFloor) {
-        alert("Please select a floor first!");
-        return;
-      }
 
       const comment = document.getElementById("comment").value;
       const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
@@ -148,20 +159,27 @@
       });
     }
 
-    // Real-time listener
+    // Real-time updates
     onSnapshot(docRef, (snap) => {
-      const currentDiv = document.getElementById("current");
+      const lastUpdate = document.getElementById("lastUpdate");
       if (snap.exists()) {
         const data = snap.data();
-        currentDiv.innerHTML = `
-          <strong>Floor ${data.floor}</strong><br>
-          ${data.comment ? "Note: " + data.comment + "<br>" : ""}
-          <span class="note">Updated by ${data.updatedBy} at ${new Date(data.updatedAt.seconds*1000).toLocaleString()}</span>
-        `;
+        lastUpdate.textContent = `Last updated: Floor ${data.floor} ${data.comment ? "(" + data.comment + ")" : ""} by ${data.updatedBy} at ${formatDate(new Date(data.updatedAt.seconds*1000))}`;
+        
+        // Highlight active button
+        const buttons = document.querySelectorAll("#floor-buttons button");
+        buttons.forEach(btn => {
+          if (btn.textContent == data.floor || (data.floor === "Other" && btn.textContent === "Other")) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
       } else {
-        currentDiv.innerHTML = "No parking record yet.";
+        lastUpdate.textContent = "No updates yet.";
       }
     });
   </script>
 </body>
 </html>
+
