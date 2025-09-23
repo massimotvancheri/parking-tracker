@@ -10,11 +10,11 @@
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #121212; /* Dark mode background */
+      background: #121212;
       color: #f1f1f1;
     }
     h1 { 
-      font-size: 1.5rem; 
+      font-size: 1.5rem;
       text-align: center;
       margin-bottom: 20px;
       white-space: nowrap;
@@ -26,7 +26,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       margin-bottom: 20px;
     }
-    input {
+    input, select {
       font-size: 1rem;
       margin-top: 10px;
       padding: 10px;
@@ -44,7 +44,6 @@
       display: block;
     }
 
-    /* Label */
     .section-label {
       text-align: center;
       font-weight: bold;
@@ -69,29 +68,26 @@
       cursor: pointer;
       color: #fff;
       transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      opacity: 0.5; /* unselected state */
+      opacity: 0.5;
     }
-
     .floor-buttons button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(0,0,0,0.4);
       opacity: 0.8;
     }
-
     .floor-buttons button.active {
       outline: 3px solid #fff;
-      opacity: 1; /* active button fully visible */
+      opacity: 1;
     }
 
     /* Unique colors */
-    .floor-6 { background-color: #1e90ff; } /* Blue */
-    .floor-5 { background-color: #009688; } /* Teal */
-    .floor-4 { background-color: #ffa500; } /* Orange */
-    .floor-3 { background-color: #88b04b; } /* Green */
-    .floor-2 { background-color: #6b5b95; } /* Purple */
-    .floor-other { background-color: #555; } /* Grey */
+    .floor-6 { background-color: #1e90ff; }
+    .floor-5 { background-color: #009688; }
+    .floor-4 { background-color: #ffa500; }
+    .floor-3 { background-color: #88b04b; }
+    .floor-2 { background-color: #6b5b95; }
+    .floor-other { background-color: #555; }
 
-    /* Divider line */
     .divider {
       border-top: 2px solid #333;
       margin: 15px 0;
@@ -102,7 +98,7 @@
   <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
-    <div class="section-label">Car wa doko</div>
+    <div class="section-label">Car is on</div>
     <div id="floor-buttons" class="floor-buttons">
       <button class="floor-6" onclick="setFloor(6)">6</button>
       <button class="floor-5" onclick="setFloor(5)">5</button>
@@ -115,6 +111,12 @@
   
     <label for="comment">Optional Comment</label>
     <input type="text" id="comment" placeholder="e.g. outside garage">
+
+    <label for="userSelect">Updated by</label>
+    <select id="userSelect">
+      <option value="Tea">Tea</option>
+      <option value="Mo">Mo</option>
+    </select>
   </div>
 
   <span id="lastUpdate" class="note">No updates yet.</span>
@@ -151,11 +153,20 @@
       });
     }
 
+    // Load saved user from localStorage
+    const userSelect = document.getElementById("userSelect");
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      userSelect.value = savedUser;
+    }
+    userSelect.addEventListener("change", () => {
+      localStorage.setItem("user", userSelect.value);
+    });
+
     // Select floor
     window.setFloor = async function(floor) {
       selectedFloor = floor;
 
-      // Highlight active button
       const buttons = document.querySelectorAll("#floor-buttons button");
       buttons.forEach(btn => {
         if (btn.textContent == floor || (floor === "Other" && btn.textContent === "Other")) {
@@ -165,7 +176,6 @@
         }
       });
 
-      // Clear comment input unless "Other" (which auto-focuses)
       const commentInput = document.getElementById("comment");
       if (floor === "Other") {
         commentInput.value = "";
@@ -174,7 +184,7 @@
         commentInput.value = "";
       }
 
-      const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
+      const updatedBy = userSelect.value;
       const updatedAt = new Date();
 
       await setDoc(docRef, {
@@ -185,10 +195,10 @@
       });
     }
 
-    // Save comment live as user types
+    // Save comment live
     document.getElementById("comment").addEventListener("input", async (e) => {
       if (!selectedFloor) return;
-      const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
+      const updatedBy = userSelect.value;
       const updatedAt = new Date();
       await updateDoc(docRef, {
         comment: e.target.value,
@@ -204,7 +214,6 @@
         const data = snap.data();
         lastUpdate.textContent = `Last updated: Floor ${data.floor} ${data.comment ? "(" + data.comment + ")" : ""} by ${data.updatedBy} at ${formatDate(new Date(data.updatedAt.seconds*1000))}`;
         
-        // Highlight active button
         const buttons = document.querySelectorAll("#floor-buttons button");
         buttons.forEach(btn => {
           if (btn.textContent == data.floor || (data.floor === "Other" && btn.textContent === "Other")) {
@@ -214,7 +223,6 @@
           }
         });
 
-        // Keep comment field in sync
         document.getElementById("comment").value = data.comment || "";
       } else {
         lastUpdate.textContent = "No updates yet.";
