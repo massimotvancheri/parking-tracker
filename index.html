@@ -59,26 +59,29 @@
       font-weight: bold;
       cursor: pointer;
       color: #fff;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      opacity: 0.5; /* unselected state */
     }
 
     .floor-buttons button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+      opacity: 0.8;
     }
 
     .floor-buttons button.active {
       outline: 3px solid #fff;
+      opacity: 1; /* make active button fully visible */
     }
 
-    /* Unique colors from your palette */
+    /* Unique colors */
     .floor-1 { background-color: #ff6f61; } /* Red */
     .floor-2 { background-color: #6b5b95; } /* Purple */
     .floor-3 { background-color: #88b04b; } /* Green */
     .floor-4 { background-color: #ffa500; } /* Orange */
     .floor-5 { background-color: #009688; } /* Teal */
     .floor-6 { background-color: #1e90ff; } /* Blue */
-    .floor-other { background-color: #ff69b4; } /* Pink */
+    .floor-other { background-color: #555; } /* Grey for Other */
   </style>
 </head>
 <body>
@@ -138,6 +141,7 @@
     window.setFloor = async function(floor) {
       selectedFloor = floor;
 
+      // Highlight active button
       const buttons = document.querySelectorAll("#floor-buttons button");
       buttons.forEach(btn => {
         if (btn.textContent == floor || (floor === "Other" && btn.textContent === "Other")) {
@@ -147,13 +151,15 @@
         }
       });
 
-      const comment = document.getElementById("comment").value;
+      // Clear comment input when a new floor is chosen
+      document.getElementById("comment").value = "";
+
       const updatedBy = navigator.userAgent.includes("iPhone") ? "iPhone" : "Browser";
       const updatedAt = new Date();
 
       await setDoc(docRef, {
         floor: selectedFloor,
-        comment: comment,
+        comment: "",
         updatedBy: updatedBy,
         updatedAt: updatedAt
       });
@@ -182,4 +188,3 @@
   </script>
 </body>
 </html>
-
