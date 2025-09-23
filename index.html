@@ -26,7 +26,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       margin-bottom: 20px;
     }
-    input, select {
+    input {
       font-size: 1rem;
       margin-top: 10px;
       padding: 10px;
@@ -42,6 +42,23 @@
       text-align: center;
       margin-top: 20px;
       display: block;
+    }
+    .user-select {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .user-select label {
+      margin-right: 8px;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+    .user-select select {
+      font-size: 1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #f1f1f1;
     }
 
     .section-label {
@@ -67,17 +84,16 @@
       font-weight: bold;
       cursor: pointer;
       color: #fff;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      opacity: 0.5;
+      transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+      filter: grayscale(60%) brightness(0.6); /* greyed-out effect */
     }
     .floor-buttons button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-      opacity: 0.8;
     }
     .floor-buttons button.active {
       outline: 3px solid #fff;
-      opacity: 1;
+      filter: none; /* active button shows full color */
     }
 
     /* Unique colors */
@@ -98,7 +114,7 @@
   <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
-    <div class="section-label">Car is on</div>
+    <div class="section-label">Kuruma wa doko</div>
     <div id="floor-buttons" class="floor-buttons">
       <button class="floor-6" onclick="setFloor(6)">6</button>
       <button class="floor-5" onclick="setFloor(5)">5</button>
@@ -111,15 +127,17 @@
   
     <label for="comment">Optional Comment</label>
     <input type="text" id="comment" placeholder="e.g. outside garage">
+  </div>
 
+  <span id="lastUpdate" class="note">No updates yet.</span>
+
+  <div class="user-select">
     <label for="userSelect">Updated by</label>
     <select id="userSelect">
       <option value="Tea">Tea</option>
       <option value="Mo">Mo</option>
     </select>
   </div>
-
-  <span id="lastUpdate" class="note">No updates yet.</span>
 
   <!-- Firebase + Firestore -->
   <script type="module">
@@ -141,7 +159,7 @@
 
     let selectedFloor = null;
 
-    // Format date to 24hr time
+    // Format date to DD/MM HH:mm (24hr)
     function formatDate(date) {
       return date.toLocaleString("en-GB", {
         day: "2-digit",
