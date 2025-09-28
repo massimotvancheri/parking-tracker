@@ -4,21 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🚗 Teemo Parking Tracker ❤️</title>
+
+  <!-- iOS / Mobile Safari theme fixes -->
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <link rel="manifest" href="manifest.json">
+
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    html, body {
+      background-color: #121212;
+      overscroll-behavior: none;
       margin: 0;
-      padding: 20px;
-      background: #121212;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       color: #f1f1f1;
     }
+
     h1 { 
       font-size: 1.5rem;
       text-align: center;
-      margin-bottom: 20px;
+      margin: 20px 0;
       white-space: nowrap;
     }
+
     .card {
       background: #1e1e1e;
       padding: 20px;
@@ -26,6 +37,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       margin-bottom: 20px;
     }
+
     .note { 
       color: #aaa; 
       font-size: 0.9rem; 
@@ -33,15 +45,18 @@
       margin-top: 20px;
       display: block;
     }
+
     .user-select {
       text-align: center;
       margin-top: 10px;
     }
+
     .user-select label {
       margin-right: 8px;
       font-size: 0.95rem;
       color: #ccc;
     }
+
     .user-select select {
       font-size: 1rem;
       padding: 6px 12px;
@@ -77,11 +92,13 @@
       transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
       opacity: 0.6;
     }
+
     .floor-buttons button.active {
       opacity: 1;
       box-shadow: 0 0 12px rgba(255,255,255,0.25);
       transform: scale(1.02);
     }
+
     .floor-buttons button .last-info {
       display: block;
       font-size: 0.85rem;
@@ -114,6 +131,7 @@
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1e1e1e;
       padding: 20px;
@@ -125,9 +143,11 @@
       gap: 12px;
       box-sizing: border-box;
     }
+
     .modal-content h2 {
       margin: 0;
     }
+
     .modal-content input {
       padding: 10px;
       border-radius: 8px;
@@ -137,10 +157,12 @@
       background: #2a2a2a;
       color: #f1f1f1;
     }
+
     .modal-buttons {
       display: flex;
       gap: 10px;
     }
+
     .modal-buttons button {
       flex: 1;
       padding: 10px;
@@ -150,6 +172,7 @@
       cursor: pointer;
       transition: background 0.2s;
     }
+
     .confirm-btn { background: #4C6A92; color: #fff; } /* Calm Slate Blue */
     .confirm-btn:hover { background: #3a5474; }
     .cancel-btn { background: #5A5A5A; color: #fff; } /* Neutral Grey */
