@@ -157,13 +157,13 @@
   <div class="card">
     <div class="section-label">Car is on</div>
     <div id="floor-buttons" class="floor-buttons">
-      <button class="floor-6" onclick="openConfirm(6)">6</button>
-      <button class="floor-5" onclick="openConfirm(5)">5</button>
-      <button class="floor-4" onclick="openConfirm(4)">4</button>
-      <button class="floor-3" onclick="openConfirm(3)">3</button>
-      <button class="floor-2" onclick="openConfirm(2)">2</button>
+      <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
+      <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
+      <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
+      <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
+      <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
       <div class="divider"></div>
-      <button class="floor-other" onclick="openConfirm('Other')">Other</button>
+      <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
     </div>
   </div>
 
@@ -199,3 +199,99 @@
       authDomain: "parking-tracker-a0f43.firebaseapp.com",
       projectId: "parking-tracker-a0f43",
       storageBucket: "parking-tracker-a0f43.appspot.com",
+      messagingSenderId: "807627988635",
+      appId: "1:807627988635:web:96653e2887c6b2778cb03e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "parking", "car");
+
+    let pendingFloor = null;
+
+    // Relative time formatter
+    function timeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "just now";
+      if (diffMins < 60) return `${diffMins} min ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} hr${diffHours>1?'s':''} ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays} day${diffDays>1?'s':''} ago`;
+    }
+
+    // Load saved user from localStorage
+    const userSelect = document.getElementById("userSelect");
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) userSelect.value = savedUser;
+    userSelect.addEventListener("change", () => {
+      localStorage.setItem("user", userSelect.value);
+    });
+
+    // Open confirm modal
+    window.openConfirm = function(floor) {
+      pendingFloor = floor;
+      document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
+      document.getElementById("confirmComment").value = "";
+      document.getElementById("confirmModal").style.display = "flex";
+    }
+
+    // Close modal
+    window.closeConfirm = function() {
+      document.getElementById("confirmModal").style.display = "none";
+    }
+
+    // Confirm selection (optimistic update)
+    window.confirmSelection = async function() {
+      const comment = document.getElementById("confirmComment").value;
+      const updatedBy = userSelect.value;
+      const updatedAt = new Date();
+
+      // Optimistic UI update immediately
+      updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
+
+      document.getElementById("confirmModal").style.display = "none";
+
+      // Save to Firestore
+      await setDoc(docRef, {
+        floor: pendingFloor,
+        comment: comment,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+    }
+
+    // Update UI helper
+    function updateUI(data) {
+      const lastUpdate = document.getElementById("lastUpdate");
+      lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
+
+      const buttons = document.querySelectorAll("#floor-buttons button");
+      buttons.forEach(btn => {
+        if (btn.dataset.label == data.floor) {
+          btn.classList.add("active");
+          btn.innerHTML = `${data.floor}<span class="last-info">${data.comment ? data.comment+" • " : ""}${timeAgo(data.updatedAt)}</span>`;
+        } else {
+          btn.classList.remove("active");
+          btn.innerHTML = btn.dataset.label;
+        }
+      });
+    }
+
+    // Real-time updates from Firestore
+    onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        updateUI({
+          floor: data.floor,
+          comment: data.comment,
+          updatedBy: data.updatedBy,
+          updatedAt: new Date(data.updatedAt.seconds*1000)
+        });
+      }
+    });
+  </script>
+</body>
+</html>
