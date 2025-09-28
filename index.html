@@ -26,16 +26,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       margin-bottom: 20px;
     }
-    input {
-      font-size: 1rem;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      width: 100%;
-      background: #2a2a2a;
-      color: #f1f1f1;
-    }
     .note { 
       color: #aaa; 
       font-size: 0.9rem; 
@@ -85,48 +75,96 @@
       cursor: pointer;
       color: #fff;
       transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
-      filter: grayscale(60%) brightness(0.6); /* greyed-out effect */
-    }
-    .floor-buttons button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+      filter: grayscale(60%) brightness(0.6);
+      position: relative;
     }
     .floor-buttons button.active {
       outline: 3px solid #fff;
-      filter: none; /* active button shows full color */
+      filter: none;
+    }
+    .floor-buttons button .last-info {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: normal;
+      margin-top: 6px;
+      color: #f1f1f1;
     }
 
-    /* Unique colors */
-    .floor-6 { background-color: #1e90ff; }
-    .floor-5 { background-color: #009688; }
-    .floor-4 { background-color: #ffa500; }
-    .floor-3 { background-color: #88b04b; }
-    .floor-2 { background-color: #6b5b95; }
+    /* Floor colors */
+    .floor-6 { background-color: #e53935; } /* Red */
+    .floor-5 { background-color: #fb8c00; } /* Orange */
+    .floor-4 { background-color: #fdd835; color:#000; } /* Yellow */
+    .floor-3 { background-color: #43a047; } /* Green */
+    .floor-2 { background-color: #1e88e5; } /* Blue */
     .floor-other { background-color: #555; }
 
     .divider {
       border-top: 2px solid #333;
       margin: 15px 0;
     }
+
+    /* Confirm Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+    }
+    .modal-content input {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      width: 100%;
+      background: #2a2a2a;
+      color: #f1f1f1;
+    }
+    .modal-buttons {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .confirm-btn { background: #43a047; color: #fff; }
+    .cancel-btn { background: #e53935; color: #fff; }
   </style>
 </head>
 <body>
   <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
-    <div class="section-label">Kuruma wa doko</div>
+    <div class="section-label">Car is on</div>
     <div id="floor-buttons" class="floor-buttons">
-      <button class="floor-6" onclick="setFloor(6)">6</button>
-      <button class="floor-5" onclick="setFloor(5)">5</button>
-      <button class="floor-4" onclick="setFloor(4)">4</button>
-      <button class="floor-3" onclick="setFloor(3)">3</button>
-      <button class="floor-2" onclick="setFloor(2)">2</button>
+      <button class="floor-6" onclick="openConfirm(6)">6</button>
+      <button class="floor-5" onclick="openConfirm(5)">5</button>
+      <button class="floor-4" onclick="openConfirm(4)">4</button>
+      <button class="floor-3" onclick="openConfirm(3)">3</button>
+      <button class="floor-2" onclick="openConfirm(2)">2</button>
       <div class="divider"></div>
-      <button class="floor-other" onclick="setFloor('Other')">Other</button>
+      <button class="floor-other" onclick="openConfirm('Other')">Other</button>
     </div>
-  
-    <label for="comment">Optional Comment</label>
-    <input type="text" id="comment" placeholder="e.g. outside garage">
   </div>
 
   <span id="lastUpdate" class="note">No updates yet.</span>
@@ -139,112 +177,25 @@
     </select>
   </div>
 
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <h2 id="confirmTitle">Confirm Floor</h2>
+      <input type="text" id="confirmComment" placeholder="Optional comment">
+      <div class="modal-buttons">
+        <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
+        <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
       authDomain: "parking-tracker-a0f43.firebaseapp.com",
       projectId: "parking-tracker-a0f43",
       storageBucket: "parking-tracker-a0f43.appspot.com",
-      messagingSenderId: "807627988635",
-      appId: "1:807627988635:web:96653e2887c6b2778cb03e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "parking", "car");
-
-    let selectedFloor = null;
-
-    // Format date to DD/MM HH:mm (24hr)
-    function formatDate(date) {
-      return date.toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-    }
-
-    // Load saved user from localStorage
-    const userSelect = document.getElementById("userSelect");
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      userSelect.value = savedUser;
-    }
-    userSelect.addEventListener("change", () => {
-      localStorage.setItem("user", userSelect.value);
-    });
-
-    // Select floor
-    window.setFloor = async function(floor) {
-      selectedFloor = floor;
-
-      const buttons = document.querySelectorAll("#floor-buttons button");
-      buttons.forEach(btn => {
-        if (btn.textContent == floor || (floor === "Other" && btn.textContent === "Other")) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
-      });
-
-      const commentInput = document.getElementById("comment");
-      if (floor === "Other") {
-        commentInput.value = "";
-        commentInput.focus();
-      } else {
-        commentInput.value = "";
-      }
-
-      const updatedBy = userSelect.value;
-      const updatedAt = new Date();
-
-      await setDoc(docRef, {
-        floor: selectedFloor,
-        comment: commentInput.value,
-        updatedBy: updatedBy,
-        updatedAt: updatedAt
-      });
-    }
-
-    // Save comment live
-    document.getElementById("comment").addEventListener("input", async (e) => {
-      if (!selectedFloor) return;
-      const updatedBy = userSelect.value;
-      const updatedAt = new Date();
-      await updateDoc(docRef, {
-        comment: e.target.value,
-        updatedBy: updatedBy,
-        updatedAt: updatedAt
-      });
-    });
-
-    // Real-time updates
-    onSnapshot(docRef, (snap) => {
-      const lastUpdate = document.getElementById("lastUpdate");
-      if (snap.exists()) {
-        const data = snap.data();
-        lastUpdate.textContent = `Last updated: Floor ${data.floor} ${data.comment ? "(" + data.comment + ")" : ""} by ${data.updatedBy} at ${formatDate(new Date(data.updatedAt.seconds*1000))}`;
-        
-        const buttons = document.querySelectorAll("#floor-buttons button");
-        buttons.forEach(btn => {
-          if (btn.textContent == data.floor || (data.floor === "Other" && btn.textContent === "Other")) {
-            btn.classList.add("active");
-          } else {
-            btn.classList.remove("active");
-          }
-        });
-
-        document.getElementById("comment").value = data.comment || "";
-      } else {
-        lastUpdate.textContent = "No updates yet.";
-      }
-    });
-  </script>
-</body>
-</html>
