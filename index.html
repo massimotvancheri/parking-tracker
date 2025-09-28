@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>🚗 Teemo Parking Tracker ❤️</title>
 
   <!-- iOS / Mobile Safari theme fixes -->
@@ -14,35 +14,53 @@
 
   <style>
     html, body {
-      background-color: #d6cec3; /* beige */
-      overscroll-behavior: none;
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
+      overflow: hidden; /* 🚫 no scroll */
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #3f3b37; /* taupe text */
+      background-color: #d6cec3; /* beige */
+      color: #3f3b37; /* taupe */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 500px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 10px;
     }
 
     h1 { 
       font-size: 1.5rem;
       text-align: center;
-      margin: 20px 0;
+      margin: 10px 0 20px;
       white-space: nowrap;
     }
 
     .card {
-      background: #e6dfd6; /* lighter beige */
+      background: #e6dfd6;
       padding: 20px;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .note { 
       color: #5c564f; 
       font-size: 0.9rem; 
       text-align: center;
-      margin-top: 20px;
+      margin-top: 10px;
       display: block;
     }
 
@@ -133,7 +151,7 @@
     }
 
     .modal-content {
-      background: #e6dfd6; /* beige */
+      background: #e6dfd6;
       padding: 20px;
       border-radius: 12px;
       width: 90%;
@@ -181,29 +199,31 @@
   </style>
 </head>
 <body>
-  <h1>🚗 Teemo Parking Tracker ❤️</h1>
+  <div class="app-container">
+    <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
-  <div class="card">
-    <div class="section-label">車はどこ？</div>
-    <div id="floor-buttons" class="floor-buttons">
-      <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
-      <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
-      <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
-      <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
-      <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
-      <div class="divider"></div>
-      <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
+    <div class="card">
+      <div class="section-label">車はどこ？</div>
+      <div id="floor-buttons" class="floor-buttons">
+        <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
+        <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
+        <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
+        <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
+        <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
+        <div class="divider"></div>
+        <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
+      </div>
     </div>
-  </div>
 
-  <span id="lastUpdate" class="note">No updates yet.</span>
+    <span id="lastUpdate" class="note">No updates yet.</span>
 
-  <div class="user-select">
-    <label for="userSelect">Updated by</label>
-    <select id="userSelect">
-      <option value="Tea">Tea</option>
-      <option value="Mo">Mo</option>
-    </select>
+    <div class="user-select">
+      <label for="userSelect">Updated by</label>
+      <select id="userSelect">
+        <option value="Tea">Tea</option>
+        <option value="Mo">Mo</option>
+      </select>
+    </div>
   </div>
 
   <!-- Confirm Modal -->
@@ -292,7 +312,7 @@
       buttons.forEach(btn => {
         if (btn.dataset.label == data.floor) {
           btn.classList.add("active");
-          btn.innerHTML = `${data.floor}<span class="last-info">${data.comment ? data.comment+" • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
+          btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment+" • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
         } else {
           btn.classList.remove("active");
           btn.textContent = btn.dataset.label;
