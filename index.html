@@ -22,18 +22,16 @@
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #d6cec3; /* beige */
       color: #3f3b37; /* taupe */
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     .app-container {
+      height: 100%;
       width: 100%;
       max-width: 500px;
-      height: 100%;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between; /* distribute vertically */
       align-items: center;
       box-sizing: border-box;
       padding: 10px;
@@ -42,7 +40,7 @@
     h1 { 
       font-size: 1.5rem;
       text-align: center;
-      margin: 10px 0 20px;
+      margin: 10px 0;
       white-space: nowrap;
     }
 
@@ -51,37 +49,8 @@
       padding: 20px;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      margin-bottom: 20px;
       width: 100%;
       box-sizing: border-box;
-    }
-
-    .note { 
-      color: #5c564f; 
-      font-size: 0.9rem; 
-      text-align: center;
-      margin-top: 10px;
-      display: block;
-    }
-
-    .user-select {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .user-select label {
-      margin-right: 8px;
-      font-size: 0.95rem;
-      color: #555;
-    }
-
-    .user-select select {
-      font-size: 1rem;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid #aaa;
-      background: #f0e8df;
-      color: #3f3b37;
     }
 
     .section-label {
@@ -126,16 +95,44 @@
     }
 
     /* Spa-inspired muted palette */
-    .floor-6 { background-color: #B55239; } /* Terracotta Red */
-    .floor-5 { background-color: #D9822B; } /* Burnt Orange */
-    .floor-4 { background-color: #D6A941; } /* Ochre Yellow */
-    .floor-3 { background-color: #6B8E23; } /* Moss Green */
-    .floor-2 { background-color: #4C6A92; } /* Slate Blue */
-    .floor-other { background-color: #5A5A5A; } /* Neutral Grey */
+    .floor-6 { background-color: #B55239; }
+    .floor-5 { background-color: #D9822B; }
+    .floor-4 { background-color: #D6A941; }
+    .floor-3 { background-color: #6B8E23; }
+    .floor-2 { background-color: #4C6A92; }
+    .floor-other { background-color: #5A5A5A; }
 
     .divider {
       border-top: 2px solid #b8b2ab;
       margin: 15px 0;
+    }
+
+    .note { 
+      color: #5c564f; 
+      font-size: 0.9rem; 
+      text-align: center;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .user-select {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .user-select label {
+      margin-right: 8px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .user-select select {
+      font-size: 1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      background: #f0e8df;
+      color: #3f3b37;
     }
 
     /* Confirm Modal */
@@ -200,8 +197,10 @@
 </head>
 <body>
   <div class="app-container">
+    <!-- Top -->
     <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
+    <!-- Middle -->
     <div class="card">
       <div class="section-label">車はどこ？</div>
       <div id="floor-buttons" class="floor-buttons">
@@ -215,14 +214,16 @@
       </div>
     </div>
 
-    <span id="lastUpdate" class="note">No updates yet.</span>
-
-    <div class="user-select">
-      <label for="userSelect">Updated by</label>
-      <select id="userSelect">
-        <option value="Tea">Tea</option>
-        <option value="Mo">Mo</option>
-      </select>
+    <!-- Bottom -->
+    <div>
+      <span id="lastUpdate" class="note">No updates yet.</span>
+      <div class="user-select">
+        <label for="userSelect">Updated by</label>
+        <select id="userSelect">
+          <option value="Tea">Tea</option>
+          <option value="Mo">Mo</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -334,4 +335,3 @@
   </script>
 </body>
 </html>
-
