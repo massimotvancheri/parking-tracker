@@ -75,28 +75,28 @@
       cursor: pointer;
       color: #fff;
       transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      opacity: 0.5; /* dimmed by default */
+      opacity: 0.5;
     }
     .floor-buttons button.active {
       opacity: 1;
-      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      box-shadow: 0 0 12px rgba(255,255,255,0.25);
+      transform: scale(1.02);
     }
     .floor-buttons button .last-info {
       display: block;
       font-size: 0.85rem;
       font-weight: normal;
       margin-top: 6px;
-      color: inherit;
       opacity: 0.9;
     }
 
-    /* Floor colors */
-    .floor-6 { background-color: #e53935; } /* Red */
-    .floor-5 { background-color: #fb8c00; } /* Orange */
-    .floor-4 { background-color: #fdd835; color: #000; text-shadow: 0 1px 2px rgba(0,0,0,0.4);} /* Yellow with dark text */
-    .floor-3 { background-color: #43a047; } /* Green */
-    .floor-2 { background-color: #1e88e5; } /* Blue */
-    .floor-other { background-color: #555; }
+    /* Muted neutral colors */
+    .floor-6 { background-color: #5C6BC0; } /* Slate Blue */
+    .floor-5 { background-color: #7986CB; } /* Indigo */
+    .floor-4 { background-color: #4DB6AC; } /* Muted Teal */
+    .floor-3 { background-color: #81C784; } /* Soft Olive */
+    .floor-2 { background-color: #90A4AE; } /* Cool Grey */
+    .floor-other { background-color: #616161; } /* Dark Grey */
 
     .divider {
       border-top: 2px solid #333;
@@ -150,17 +150,17 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .confirm-btn { background: #1e88e5; color: #fff; } /* minimalist blue */
-    .confirm-btn:hover { background: #1565c0; }
-    .cancel-btn { background: #555; color: #fff; } /* minimalist gray */
-    .cancel-btn:hover { background: #333; }
+    .confirm-btn { background: #5C6BC0; color: #fff; } /* Slate Blue */
+    .confirm-btn:hover { background: #3f51b5; }
+    .cancel-btn { background: #616161; color: #fff; } /* Neutral Gray */
+    .cancel-btn:hover { background: #424242; }
   </style>
 </head>
 <body>
   <h1>🚗 Teemo Parking Tracker ❤️</h1>
 
   <div class="card">
-    <div class="section-label">Car is on</div>
+    <div class="section-label">車はどこ？</div>
     <div id="floor-buttons" class="floor-buttons">
       <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
       <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
@@ -214,7 +214,6 @@
 
     let pendingFloor = null;
 
-    // Relative time formatter
     function timeAgo(date) {
       const now = new Date();
       const diffMs = now - date;
@@ -227,7 +226,6 @@
       return `${diffDays} day${diffDays>1?'s':''} ago`;
     }
 
-    // Load saved user from localStorage
     const userSelect = document.getElementById("userSelect");
     const savedUser = localStorage.getItem("user");
     if (savedUser) userSelect.value = savedUser;
@@ -235,7 +233,6 @@
       localStorage.setItem("user", userSelect.value);
     });
 
-    // Open confirm modal
     window.openConfirm = function(floor) {
       pendingFloor = floor;
       document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
@@ -243,23 +240,18 @@
       document.getElementById("confirmModal").style.display = "flex";
     }
 
-    // Close modal
     window.closeConfirm = function() {
       document.getElementById("confirmModal").style.display = "none";
     }
 
-    // Confirm selection (optimistic update)
     window.confirmSelection = async function() {
       const comment = document.getElementById("confirmComment").value;
       const updatedBy = userSelect.value;
       const updatedAt = new Date();
 
-      // Optimistic UI update
       updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
-
       document.getElementById("confirmModal").style.display = "none";
 
-      // Save to Firestore
       await setDoc(docRef, {
         floor: pendingFloor,
         comment: comment,
@@ -268,7 +260,6 @@
       });
     }
 
-    // Update UI helper
     function updateUI(data) {
       const lastUpdate = document.getElementById("lastUpdate");
       lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
@@ -285,7 +276,6 @@
       });
     }
 
-    // Real-time updates from Firestore
     onSnapshot(docRef, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
@@ -300,4 +290,3 @@
   </script>
 </body>
 </html>
-
