@@ -3,224 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚗 Teemo Parking Tracker ❤️</title>
-
-  <!-- iOS / Mobile Safari theme fixes -->
-  <meta name="theme-color" content="#121212">
+  <title>Teemo Parking Tracker ❤️</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#d9d9d6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <link rel="manifest" href="manifest.json">
-
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <style>
-    html, body {
-      background-color: #121212;
-      overscroll-behavior: none;
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+      background: #d9d9d6; /* light grey background */
+      color: #3a3a3a;      /* muted dark grey text */
     }
 
-    h1 { 
+    h1 {
       font-size: 1.5rem;
       text-align: center;
-      margin: 20px 0;
-      white-space: nowrap;
+      color: #3a3a3a;
     }
 
     .card {
-      background: #1e1e1e;
+      background: #f5f3ef; /* beige card */
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
       margin-bottom: 20px;
     }
 
-    .note { 
-      color: #aaa; 
-      font-size: 0.9rem; 
-      text-align: center;
-      margin-top: 20px;
-      display: block;
-    }
-
-    .user-select {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .user-select label {
-      margin-right: 8px;
-      font-size: 0.95rem;
-      color: #ccc;
-    }
-
-    .user-select select {
-      font-size: 1rem;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background: #2a2a2a;
-      color: #f1f1f1;
-    }
-
-    .section-label {
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-    }
-
-    /* Floor buttons */
     .floor-buttons {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin: 20px 0;
-    }
-
-    .floor-buttons button {
-      padding: 20px;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.3rem;
-      font-weight: bold;
-      cursor: pointer;
-      color: #fff;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      opacity: 0.6;
-    }
-
-    .floor-buttons button.active {
-      opacity: 1;
-      box-shadow: 0 0 12px rgba(255,255,255,0.25);
-      transform: scale(1.02);
-    }
-
-    .floor-buttons button .last-info {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: normal;
-      margin-top: 6px;
-      opacity: 0.9;
-    }
-
-    /* Spa-inspired muted palette */
-    .floor-6 { background-color: #B55239; } /* Terracotta Red */
-    .floor-5 { background-color: #D9822B; } /* Burnt Orange */
-    .floor-4 { background-color: #D6A941; color:#000; text-shadow: 0 1px 2px rgba(0,0,0,0.3);} /* Ochre Yellow */
-    .floor-3 { background-color: #6B8E23; } /* Moss Green */
-    .floor-2 { background-color: #4C6A92; } /* Slate Blue */
-    .floor-other { background-color: #5A5A5A; } /* Neutral Grey */
-
-    .divider {
-      border-top: 2px solid #333;
       margin: 15px 0;
     }
 
-    /* Confirm Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    .floor-buttons button {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .modal-content {
-      background: #1e1e1e;
-      padding: 20px;
+    .floor-buttons button.inactive {
+      opacity: 0.6;
+      filter: grayscale(40%);
+    }
+
+    .confirm-box {
+      background: #f5f3ef;
       border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      box-sizing: border-box;
+      padding: 16px;
+      margin-top: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .modal-content h2 {
-      margin: 0;
-    }
-
-    .modal-content input {
+    .confirm-box input {
+      width: 100%;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid #444;
-      width: 100%;
-      box-sizing: border-box;
-      background: #2a2a2a;
-      color: #f1f1f1;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+      font-size: 1rem;
     }
 
-    .modal-buttons {
+    .confirm-actions {
       display: flex;
+      justify-content: space-between;
       gap: 10px;
     }
 
-    .modal-buttons button {
+    .confirm-actions button {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
+      font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
     }
 
-    .confirm-btn { background: #4C6A92; color: #fff; } /* Calm Slate Blue */
-    .confirm-btn:hover { background: #3a5474; }
-    .cancel-btn { background: #5A5A5A; color: #fff; } /* Neutral Grey */
-    .cancel-btn:hover { background: #424242; }
+    .confirm-btn {
+      background: #3a3a3a;  /* muted dark grey */
+      color: #f5f3ef;       /* beige text */
+    }
+    .confirm-btn:hover { background: #2a2a2a; }
+
+    .cancel-btn {
+      background: #d9d9d6;  /* light grey */
+      color: #3a3a3a;       /* dark text */
+      border: 1px solid #aaa;
+    }
+    .cancel-btn:hover { background: #c5c5c5; }
+
+    .note {
+      color: #555;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 12px 0;
+    }
   </style>
 </head>
 <body>
-  <h1>🚗 Teemo Parking Tracker ❤️</h1>
+  <h1>🚗 車はどこ？ ❤️</h1>
 
   <div class="card">
-    <div class="section-label">車はどこ？</div>
+    <div style="text-align:center; font-weight:bold; margin-bottom:10px;">Car is on</div>
     <div id="floor-buttons" class="floor-buttons">
-      <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
-      <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
-      <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
-      <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
-      <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
-      <div class="divider"></div>
-      <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
+      <button style="background:#e74c3c; color:white;" onclick="selectFloor(6)">6</button>
+      <button style="background:#e67e22; color:white;" onclick="selectFloor(5)">5</button>
+      <button style="background:#f1c40f; color:black;" onclick="selectFloor(4)">4</button>
+      <button style="background:#27ae60; color:white;" onclick="selectFloor(3)">3</button>
+      <button style="background:#2980b9; color:white;" onclick="selectFloor(2)">2</button>
+      <hr>
+      <button style="background:#7f8c8d; color:white;" onclick="selectFloor('Other')">Other</button>
     </div>
-  </div>
-
-  <span id="lastUpdate" class="note">No updates yet.</span>
-
-  <div class="user-select">
-    <label for="userSelect">Updated by</label>
-    <select id="userSelect">
-      <option value="Tea">Tea</option>
-      <option value="Mo">Mo</option>
-    </select>
-  </div>
-
-  <!-- Confirm Modal -->
-  <div id="confirmModal" class="modal">
-    <div class="modal-content">
-      <h2 id="confirmTitle">Confirm Floor</h2>
-      <input type="text" id="confirmComment" placeholder="Optional comment">
-      <div class="modal-buttons">
+    <div id="confirm-box" class="confirm-box" style="display:none;">
+      <input type="text" id="comment" placeholder="Optional comment...">
+      <div class="confirm-actions">
+        <button class="cancel-btn" onclick="cancelSelection()">Cancel</button>
         <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
-        <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
       </div>
     </div>
   </div>
 
+  <div class="note" id="last-updated">
+    No updates yet.
+  </div>
+
   <!-- Firebase + Firestore -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
@@ -237,79 +162,66 @@
 
     let pendingFloor = null;
 
-    function timeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "just now";
-      if (diffMins < 60) return `${diffMins} min ago`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours} hr${diffHours>1?'s':''} ago`;
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays} day${diffDays>1?'s':''} ago`;
-    }
-
-    const userSelect = document.getElementById("userSelect");
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) userSelect.value = savedUser;
-    userSelect.addEventListener("change", () => {
-      localStorage.setItem("user", userSelect.value);
-    });
-
-    window.openConfirm = function(floor) {
+    function selectFloor(floor) {
       pendingFloor = floor;
-      document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
-      document.getElementById("confirmComment").value = "";
-      document.getElementById("confirmModal").style.display = "flex";
+      document.getElementById("comment").value = "";
+      document.getElementById("confirm-box").style.display = "block";
     }
 
-    window.closeConfirm = function() {
-      document.getElementById("confirmModal").style.display = "none";
+    function cancelSelection() {
+      pendingFloor = null;
+      document.getElementById("confirm-box").style.display = "none";
     }
 
-    window.confirmSelection = async function() {
-      const comment = document.getElementById("confirmComment").value;
-      const updatedBy = userSelect.value;
+    async function confirmSelection() {
+      if (!pendingFloor) return;
+      const comment = document.getElementById("comment").value;
+      const updatedBy = localStorage.getItem("user") || "Tea";
       const updatedAt = new Date();
-
-      updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
-      document.getElementById("confirmModal").style.display = "none";
 
       await setDoc(docRef, {
         floor: pendingFloor,
-        comment: comment,
-        updatedBy: updatedBy,
-        updatedAt: updatedAt
+        comment,
+        updatedBy,
+        updatedAt
       });
+
+      pendingFloor = null;
+      document.getElementById("confirm-box").style.display = "none";
+      loadLocation();
     }
 
-    function updateUI(data) {
-      const lastUpdate = document.getElementById("lastUpdate");
-      lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
-
-      const buttons = document.querySelectorAll("#floor-buttons button");
-      buttons.forEach(btn => {
-        if (btn.dataset.label == data.floor) {
-          btn.classList.add("active");
-          btn.innerHTML = `${data.floor}<span class="last-info">${data.comment ? data.comment+" • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
-        } else {
-          btn.classList.remove("active");
-          btn.textContent = btn.dataset.label;
-        }
-      });
-    }
-
-    onSnapshot(docRef, (snap) => {
+    async function loadLocation() {
+      const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data = snap.data();
-        updateUI({
-          floor: data.floor,
-          comment: data.comment,
-          updatedBy: data.updatedBy,
-          updatedAt: new Date(data.updatedAt.seconds*1000)
+        const updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt.seconds*1000);
+        const diffMs = new Date() - updatedAt;
+        const diffMins = Math.floor(diffMs / 60000);
+        let timeAgo = diffMins < 60
+          ? `${diffMins} min ago`
+          : diffMins < 1440
+          ? `${Math.floor(diffMins/60)} hr ago`
+          : `${Math.floor(diffMins/1440)} days ago`;
+
+        document.getElementById("last-updated").innerHTML = `
+          Last updated ${timeAgo}<br>
+          by ${data.updatedBy}
+        `;
+
+        // Highlight active button
+        const buttons = document.querySelectorAll("#floor-buttons button");
+        buttons.forEach(btn => {
+          if (btn.textContent == data.floor || (data.floor === "Other" && btn.textContent === "Other")) {
+            btn.classList.remove("inactive");
+          } else {
+            btn.classList.add("inactive");
+          }
         });
       }
-    });
+    }
+
+    loadLocation();
   </script>
 </body>
 </html>
