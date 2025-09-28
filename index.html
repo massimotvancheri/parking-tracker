@@ -31,8 +31,6 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* distribute vertically */
-      align-items: center;
       box-sizing: border-box;
       padding: 10px;
     }
@@ -42,6 +40,7 @@
       text-align: center;
       margin: 10px 0;
       white-space: nowrap;
+      flex-shrink: 0; /* never disappear */
     }
 
     .card {
@@ -51,6 +50,10 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       width: 100%;
       box-sizing: border-box;
+      flex: 1; /* take remaining space */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* center buttons vertically */
     }
 
     .section-label {
@@ -65,14 +68,15 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin: 20px 0;
+      flex: 1;
+      justify-content: center; /* distribute vertically */
     }
 
     .floor-buttons button {
-      padding: 20px;
+      padding: 14px;
       border: none;
       border-radius: 12px;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: bold;
       cursor: pointer;
       color: #fff;
@@ -88,9 +92,9 @@
 
     .floor-buttons button .last-info {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: normal;
-      margin-top: 6px;
+      margin-top: 4px;
       opacity: 0.9;
     }
 
@@ -104,31 +108,32 @@
 
     .divider {
       border-top: 2px solid #b8b2ab;
-      margin: 15px 0;
+      margin: 10px 0;
+    }
+
+    /* Bottom section */
+    .bottom {
+      flex-shrink: 0;
+      text-align: center;
+      margin-top: 8px;
     }
 
     .note { 
       color: #5c564f; 
       font-size: 0.9rem; 
-      text-align: center;
       display: block;
-      margin-bottom: 8px;
-    }
-
-    .user-select {
-      text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 6px;
     }
 
     .user-select label {
       margin-right: 8px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #555;
     }
 
     .user-select select {
-      font-size: 1rem;
-      padding: 6px 12px;
+      font-size: 0.95rem;
+      padding: 4px 10px;
       border-radius: 8px;
       border: 1px solid #aaa;
       background: #f0e8df;
@@ -215,7 +220,7 @@
     </div>
 
     <!-- Bottom -->
-    <div>
+    <div class="bottom">
       <span id="lastUpdate" class="note">No updates yet.</span>
       <div class="user-select">
         <label for="userSelect">Updated by</label>
