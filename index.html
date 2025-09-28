@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teemo Parking Tracker ❤️</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#d9d9d6">
+  <meta name="theme-color" content="#d6cec3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="/icon-192.png">
@@ -14,18 +14,18 @@
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #d9d9d6; /* light grey background */
-      color: #3a3a3a;      /* muted dark grey text */
+      background: #d6cec3; /* warm beige background */
+      color: #3f3b37;      /* muted dark taupe text */
     }
 
     h1 {
       font-size: 1.5rem;
       text-align: center;
-      color: #3a3a3a;
+      color: #3f3b37;
     }
 
     .card {
-      background: #f5f3ef; /* beige card */
+      background: #e6dfd6; /* lighter beige card */
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.08);
@@ -48,6 +48,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
+      color: #f5f5f5; /* off-white text for readability */
     }
 
     .floor-buttons button.inactive {
@@ -56,20 +57,22 @@
     }
 
     .confirm-box {
-      background: #f5f3ef;
+      background: #e6dfd6; /* beige box */
       border-radius: 12px;
       padding: 16px;
       margin-top: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
     .confirm-box input {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #b8b2ab; /* muted beige-grey */
       margin-bottom: 12px;
       font-size: 1rem;
+      background: #f0e8df;
+      color: #3f3b37;
     }
 
     .confirm-actions {
@@ -90,27 +93,27 @@
     }
 
     .confirm-btn {
-      background: #3a3a3a;  /* muted dark grey */
-      color: #f5f3ef;       /* beige text */
+      background: #8c8176;  /* muted beige-grey */
+      color: #f5f3ef;       /* off-white */
     }
-    .confirm-btn:hover { background: #2a2a2a; }
+    .confirm-btn:hover { background: #6f655d; }
 
     .cancel-btn {
-      background: #d9d9d6;  /* light grey */
-      color: #3a3a3a;       /* dark text */
-      border: 1px solid #aaa;
+      background: #d6cec3;  /* beige */
+      color: #3f3b37;       /* taupe text */
+      border: 1px solid #b8b2ab;
     }
-    .cancel-btn:hover { background: #c5c5c5; }
+    .cancel-btn:hover { background: #c5bcb2; }
 
     .note {
-      color: #555;
+      color: #5c564f;
       font-size: 0.9rem;
       text-align: center;
     }
 
     hr {
       border: none;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid #b8b2ab;
       margin: 12px 0;
     }
   </style>
@@ -121,13 +124,13 @@
   <div class="card">
     <div style="text-align:center; font-weight:bold; margin-bottom:10px;">Car is on</div>
     <div id="floor-buttons" class="floor-buttons">
-      <button style="background:#e74c3c; color:white;" onclick="selectFloor(6)">6</button>
-      <button style="background:#e67e22; color:white;" onclick="selectFloor(5)">5</button>
-      <button style="background:#f1c40f; color:black;" onclick="selectFloor(4)">4</button>
-      <button style="background:#27ae60; color:white;" onclick="selectFloor(3)">3</button>
-      <button style="background:#2980b9; color:white;" onclick="selectFloor(2)">2</button>
+      <button style="background:#b55239;" onclick="selectFloor(6)">6</button>
+      <button style="background:#d9822b;" onclick="selectFloor(5)">5</button>
+      <button style="background:#d6a941;" onclick="selectFloor(4)">4</button>
+      <button style="background:#6b8e23;" onclick="selectFloor(3)">3</button>
+      <button style="background:#4c6a92;" onclick="selectFloor(2)">2</button>
       <hr>
-      <button style="background:#7f8c8d; color:white;" onclick="selectFloor('Other')">Other</button>
+      <button style="background:#5a5a5a;" onclick="selectFloor('Other')">Other</button>
     </div>
     <div id="confirm-box" class="confirm-box" style="display:none;">
       <input type="text" id="comment" placeholder="Optional comment...">
