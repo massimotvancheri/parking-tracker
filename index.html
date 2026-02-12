@@ -1,11 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>🚗 Teemo Parking Tracker ❤️</title>
+  <title>🚗 Parking Tracker ❤️</title>
 
-  <!-- iOS / Mobile Safari theme fixes -->
   <meta name="theme-color" content="#d6cec3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,8 +20,8 @@
       width: 100%;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #d6cec3; /* beige */
-      color: #3f3b37; /* taupe */
+      background-color: #d6cec3;
+      color: #3f3b37;
     }
 
     .app-container {
@@ -59,7 +59,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       width: 100%;
       box-sizing: border-box;
-      flex: 1; /* middle grows/shrinks */
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -72,7 +72,6 @@
       margin-bottom: 15px;
     }
 
-    /* Floor buttons */
     .floor-buttons {
       display: flex;
       flex-direction: column;
@@ -105,7 +104,6 @@
       opacity: 0.9;
     }
 
-    /* Spa-inspired muted palette */
     .floor-6 { background-color: #B55239; }
     .floor-5 { background-color: #D9822B; }
     .floor-4 { background-color: #D6A941; color: #000; }
@@ -118,7 +116,6 @@
       margin: 10px 0;
     }
 
-    /* Bottom section */
     .bottom {
       text-align: center;
       margin-top: 8px;
@@ -138,7 +135,7 @@
     }
 
     .user-select select {
-      font-size: 0.95rem;
+      font-size: 16px;
       padding: 4px 10px;
       border-radius: 8px;
       border: 1px solid #aaa;
@@ -146,7 +143,6 @@
       color: #3f3b37;
     }
 
-    /* Confirm Modal */
     .modal {
       display: none;
       position: fixed;
@@ -205,43 +201,42 @@
     .confirm-btn:hover { background: #6f655d; }
     .cancel-btn { background: #d6cec3; color: #3f3b37; border: 1px solid #aaa; } 
     .cancel-btn:hover { background: #c5bcb2; }
+
+    .setup-msg {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 1.1rem;
+      color: #5c564f;
+      line-height: 1.6;
+    }
+    .setup-msg code {
+      background: #d6cec3;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Top (safe area for notch) -->
     <div class="safe-top">
-      <h1>🚗 Teemo Parking Tracker ❤️</h1>
+      <h1 id="appTitle">🚗 Parking Tracker ❤️</h1>
     </div>
 
-    <!-- Middle -->
     <div class="card">
-      <div class="section-label">車はどこ？</div>
-      <div id="floor-buttons" class="floor-buttons">
-        <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
-        <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
-        <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
-        <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
-        <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
-        <div class="divider"></div>
-        <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
-      </div>
+      <div id="mainContent"></div>
     </div>
 
-    <!-- Bottom (safe area for home indicator) -->
     <div class="bottom safe-bottom">
       <span id="lastUpdate" class="note">No updates yet.</span>
-      <div class="user-select">
+      <div class="user-select" id="userSelectContainer">
         <label for="userSelect">Updated by</label>
-        <select id="userSelect">
-          <option value="Tea">Tea</option>
-          <option value="Mo">Mo</option>
-        </select>
+        <select id="userSelect"></select>
       </div>
     </div>
   </div>
 
-  <!-- Confirm Modal -->
   <div id="confirmModal" class="modal">
     <div class="modal-content">
       <h2 id="confirmTitle">Confirm Floor</h2>
@@ -253,7 +248,6 @@
     </div>
   </div>
 
-  <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -267,85 +261,140 @@
       appId: "1:807627988635:web:96653e2887c6b2778cb03e"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "parking", "car");
+    // Parse URL params
+    const params = new URLSearchParams(window.location.search);
+    const groupId = params.get("id");
+    const title = params.get("title");
+    const usersParam = params.get("users");
 
-    let pendingFloor = null;
+    const mainContent = document.getElementById("mainContent");
 
-    function timeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "just now";
-      if (diffMins < 60) return `${diffMins} min ago`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours} hr${diffHours>1?'s':''} ago`;
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays} day${diffDays>1?'s':''} ago`;
-    }
+    if (!groupId) {
+      // No group ID — show setup instructions
+      document.getElementById("appTitle").textContent = "🚗 Parking Tracker";
+      mainContent.innerHTML = `
+        <div class="setup-msg">
+          <p>Welcome! Add these to the URL to get started:</p>
+          <p><code>?id=mygroup&title=My Title&users=Name1,Name2</code></p>
+          <p><strong>id</strong> = unique group name (required)<br>
+          <strong>title</strong> = custom app title<br>
+          <strong>users</strong> = comma-separated names</p>
+          <p>Example:<br>
+          <code>?id=teemo&title=🚗 Teemo Parking Tracker ❤️&users=Tea,Mo</code></p>
+        </div>
+      `;
+      document.getElementById("userSelectContainer").style.display = "none";
+      document.getElementById("lastUpdate").style.display = "none";
+    } else {
+      // Set title
+      const appTitle = title || `🚗 ${groupId} Parking Tracker ❤️`;
+      document.getElementById("appTitle").textContent = appTitle;
+      document.title = appTitle;
 
-    const userSelect = document.getElementById("userSelect");
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) userSelect.value = savedUser;
-    userSelect.addEventListener("change", () => {
-      localStorage.setItem("user", userSelect.value);
-    });
-
-    window.openConfirm = function(floor) {
-      pendingFloor = floor;
-      document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
-      document.getElementById("confirmComment").value = "";
-      document.getElementById("confirmModal").style.display = "flex";
-    }
-
-    window.closeConfirm = function() {
-      document.getElementById("confirmModal").style.display = "none";
-    }
-
-    window.confirmSelection = async function() {
-      const comment = document.getElementById("confirmComment").value;
-      const updatedBy = userSelect.value;
-      const updatedAt = new Date();
-
-      updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
-      document.getElementById("confirmModal").style.display = "none";
-
-      await setDoc(docRef, {
-        floor: pendingFloor,
-        comment: comment,
-        updatedBy: updatedBy,
-        updatedAt: updatedAt
+      // Set up user dropdown
+      const users = usersParam ? usersParam.split(",").map(u => u.trim()) : ["User 1", "User 2"];
+      const userSelect = document.getElementById("userSelect");
+      users.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u;
+        opt.textContent = u;
+        userSelect.appendChild(opt);
       });
-    }
 
-    function updateUI(data) {
-      const lastUpdate = document.getElementById("lastUpdate");
-      lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
+      const savedUser = localStorage.getItem(`user-${groupId}`);
+      if (savedUser) userSelect.value = savedUser;
+      userSelect.addEventListener("change", () => {
+        localStorage.setItem(`user-${groupId}`, userSelect.value);
+      });
 
-      const buttons = document.querySelectorAll("#floor-buttons button");
-      buttons.forEach(btn => {
-        if (btn.dataset.label == data.floor) {
-          btn.classList.add("active");
-          btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment+" • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
-        } else {
-          btn.classList.remove("active");
-          btn.textContent = btn.dataset.label;
+      // Build floor buttons
+      mainContent.innerHTML = `
+        <div class="section-label">車はどこ？</div>
+        <div id="floor-buttons" class="floor-buttons">
+          <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
+          <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
+          <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
+          <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
+          <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
+          <div class="divider"></div>
+          <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
+        </div>
+      `;
+
+      // Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const docRef = doc(db, "parking", groupId);
+
+      let pendingFloor = null;
+
+      function timeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 1) return "just now";
+        if (diffMins < 60) return `${diffMins} min ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      }
+
+      window.openConfirm = function(floor) {
+        pendingFloor = floor;
+        document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
+        document.getElementById("confirmComment").value = "";
+        document.getElementById("confirmModal").style.display = "flex";
+      }
+
+      window.closeConfirm = function() {
+        document.getElementById("confirmModal").style.display = "none";
+      }
+
+      window.confirmSelection = async function() {
+        const comment = document.getElementById("confirmComment").value;
+        const updatedBy = userSelect.value;
+        const updatedAt = new Date();
+
+        updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
+        document.getElementById("confirmModal").style.display = "none";
+
+        await setDoc(docRef, {
+          floor: pendingFloor,
+          comment: comment,
+          updatedBy: updatedBy,
+          updatedAt: updatedAt
+        });
+      }
+
+      function updateUI(data) {
+        const lastUpdate = document.getElementById("lastUpdate");
+        lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
+
+        const buttons = document.querySelectorAll("#floor-buttons button");
+        buttons.forEach(btn => {
+          if (btn.dataset.label == data.floor) {
+            btn.classList.add("active");
+            btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment + " • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
+          } else {
+            btn.classList.remove("active");
+            btn.textContent = btn.dataset.label;
+          }
+        });
+      }
+
+      onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          updateUI({
+            floor: data.floor,
+            comment: data.comment,
+            updatedBy: data.updatedBy,
+            updatedAt: new Date(data.updatedAt.seconds * 1000)
+          });
         }
       });
     }
-
-    onSnapshot(docRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        updateUI({
-          floor: data.floor,
-          comment: data.comment,
-          updatedBy: data.updatedBy,
-          updatedAt: new Date(data.updatedAt.seconds*1000)
-        });
-      }
-    });
   </script>
 </body>
 </html>
