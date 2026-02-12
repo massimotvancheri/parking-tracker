@@ -1,0 +1,9 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/parking-tracker-a0f43/cloud-run-source-deploy/parking-tracker:latest', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/parking-tracker-a0f43/cloud-run-source-deploy/parking-tracker:latest']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args: ['gcloud', 'run', 'deploy', 'parking-tracker', '--image', 'us-central1-docker.pkg.dev/parking-tracker-a0f43/cloud-run-source-deploy/parking-tracker:latest', '--region', 'us-central1', '--allow-unauthenticated']
