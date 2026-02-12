@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>🚗 Parking Tracker</title>
+  <title>🚗 Teemo Parking Tracker ❤️</title>
 
   <meta name="theme-color" content="#d6cec3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -199,112 +199,37 @@
     .confirm-btn:hover { background: #6f655d; }
     .cancel-btn { background: #d6cec3; color: #3f3b37; border: 1px solid #aaa; } 
     .cancel-btn:hover { background: #c5bcb2; }
-
-    /* Setup screen */
-    .setup-form {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 10px 0;
-    }
-
-    .setup-form label {
-      font-weight: bold;
-      font-size: 0.95rem;
-      margin-bottom: -8px;
-    }
-
-    .setup-form input {
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #aaa;
-      background: #f0e8df;
-      color: #3f3b37;
-      font-size: 16px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .setup-form .hint {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: -8px;
-    }
-
-    .setup-form button {
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      background: #8c8176;
-      color: #f5f3ef;
-      margin-top: 6px;
-    }
-
-    .setup-form button:hover {
-      background: #6f655d;
-    }
-
-    .setup-msg {
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 1.1rem;
-      color: #5c564f;
-      line-height: 1.6;
-    }
-
-    .setup-msg code {
-      background: #d6cec3;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-
-    /* Settings gear */
-    .settings-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: none;
-      border: none;
-      font-size: 1.4rem;
-      cursor: pointer;
-      opacity: 0.5;
-      padding: 4px;
-    }
-    .settings-btn:hover { opacity: 1; }
-
-    .app-container { position: relative; }
-
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      font-size: 1.1rem;
-      color: #888;
-    }
   </style>
 </head>
 <body>
   <div class="app-container">
     <div class="safe-top">
-      <h1 id="appTitle">🚗 Parking Tracker</h1>
-      <button class="settings-btn" id="settingsBtn" style="display:none;" onclick="showSetup()">⚙️</button>
+      <!-- ✏️ EDIT TITLE HERE -->
+      <h1>🚗 Teemo Parking Tracker ❤️</h1>
     </div>
 
     <div class="card">
-      <div id="mainContent">
-        <div class="loading">Loading...</div>
+      <div class="section-label">車はどこ？</div>
+      <div id="floor-buttons" class="floor-buttons">
+        <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
+        <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
+        <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
+        <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
+        <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
+        <div class="divider"></div>
+        <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
       </div>
     </div>
 
     <div class="bottom safe-bottom">
-      <span id="lastUpdate" class="note" style="display:none;">No updates yet.</span>
-      <div class="user-select" id="userSelectContainer" style="display:none;">
+      <span id="lastUpdate" class="note">No updates yet.</span>
+      <div class="user-select">
         <label for="userSelect">Updated by</label>
-        <select id="userSelect"></select>
+        <!-- ✏️ EDIT USER NAMES HERE -->
+        <select id="userSelect">
+          <option value="Tea">Tea</option>
+          <option value="Mo">Mo</option>
+        </select>
       </div>
     </div>
   </div>
@@ -322,7 +247,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
@@ -333,196 +258,87 @@
       appId: "1:807627988635:web:96653e2887c6b2778cb03e"
     };
 
-    const fbApp = initializeApp(firebaseConfig);
-    const db = getFirestore(fbApp);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    const params = new URLSearchParams(window.location.search);
-    const groupId = params.get("id");
-    const mainContent = document.getElementById("mainContent");
+    // ✏️ EDIT GROUP ID HERE — must be unique per group
+    const docRef = doc(db, "parking", "teemo");
 
-    if (!groupId) {
-      document.getElementById("appTitle").textContent = "🚗 Parking Tracker";
-      mainContent.innerHTML = `
-        <div class="setup-msg">
-          <p>Welcome! Add <code>?id=yourgroup</code> to the URL to get started.</p>
-          <p>Example:<br><code>?id=teemo</code></p>
-        </div>
-      `;
-    } else {
-      // References
-      const settingsRef = doc(db, "settings", groupId);
-      const parkingRef = doc(db, "parking", groupId);
+    let pendingFloor = null;
 
-      // Check if this group has been set up
-      const settingsSnap = await getDoc(settingsRef);
-
-      if (settingsSnap.exists()) {
-        loadApp(settingsSnap.data());
-      } else {
-        showSetupScreen();
-      }
-
-      function showSetupScreen() {
-        document.getElementById("appTitle").textContent = "🚗 New Group Setup";
-        document.getElementById("settingsBtn").style.display = "none";
-        document.getElementById("lastUpdate").style.display = "none";
-        document.getElementById("userSelectContainer").style.display = "none";
-
-        mainContent.innerHTML = `
-          <div class="setup-form">
-            <label>App Title</label>
-            <input type="text" id="setupTitle" placeholder="🚗 Teemo Parking Tracker ❤️" value="${settingsSnap?.data()?.title || ''}">
-            <div class="hint">Emojis welcome!</div>
-
-            <label>User Names</label>
-            <input type="text" id="setupUsers" placeholder="Tea, Mo" value="${settingsSnap?.data()?.users?.join(', ') || ''}">
-            <div class="hint">Comma-separated names for the "Updated by" dropdown</div>
-
-            <button onclick="saveSetup()">Save & Start</button>
-          </div>
-        `;
-      }
-
-      window.showSetup = function() {
-        showSetupScreen();
-      }
-
-      window.saveSetup = async function() {
-        const title = document.getElementById("setupTitle").value.trim();
-        const usersRaw = document.getElementById("setupUsers").value.trim();
-
-        if (!title || !usersRaw) {
-          alert("Please fill in both fields.");
-          return;
-        }
-
-        const users = usersRaw.split(",").map(u => u.trim()).filter(u => u);
-
-        if (users.length < 1) {
-          alert("Please enter at least one user name.");
-          return;
-        }
-
-        const settings = { title, users };
-        await setDoc(settingsRef, settings);
-        loadApp(settings);
-      }
-
-      function loadApp(settings) {
-        const { title, users } = settings;
-
-        // Set title
-        document.getElementById("appTitle").textContent = title;
-        document.title = title;
-
-        // Show settings gear
-        document.getElementById("settingsBtn").style.display = "block";
-
-        // Show bottom section
-        document.getElementById("lastUpdate").style.display = "block";
-        document.getElementById("userSelectContainer").style.display = "block";
-
-        // Build user dropdown
-        const userSelect = document.getElementById("userSelect");
-        userSelect.innerHTML = "";
-        users.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u;
-          opt.textContent = u;
-          userSelect.appendChild(opt);
-        });
-
-        const savedUser = localStorage.getItem(`user-${groupId}`);
-        if (savedUser && users.includes(savedUser)) userSelect.value = savedUser;
-        userSelect.addEventListener("change", () => {
-          localStorage.setItem(`user-${groupId}`, userSelect.value);
-        });
-
-        // Build floor buttons
-        mainContent.innerHTML = `
-          <div class="section-label">車はどこ？</div>
-          <div id="floor-buttons" class="floor-buttons">
-            <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
-            <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
-            <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
-            <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
-            <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
-            <div class="divider"></div>
-            <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
-          </div>
-        `;
-
-        // Floor selection
-        let pendingFloor = null;
-
-        window.openConfirm = function(floor) {
-          pendingFloor = floor;
-          document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
-          document.getElementById("confirmComment").value = "";
-          document.getElementById("confirmModal").style.display = "flex";
-        }
-
-        window.closeConfirm = function() {
-          document.getElementById("confirmModal").style.display = "none";
-        }
-
-        window.confirmSelection = async function() {
-          const comment = document.getElementById("confirmComment").value;
-          const updatedBy = userSelect.value;
-          const updatedAt = new Date();
-
-          updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
-          document.getElementById("confirmModal").style.display = "none";
-
-          await setDoc(parkingRef, {
-            floor: pendingFloor,
-            comment: comment,
-            updatedBy: updatedBy,
-            updatedAt: updatedAt
-          });
-        }
-
-        function timeAgo(date) {
-          const now = new Date();
-          const diffMs = now - date;
-          const diffMins = Math.floor(diffMs / 60000);
-          if (diffMins < 1) return "just now";
-          if (diffMins < 60) return `${diffMins} min ago`;
-          const diffHours = Math.floor(diffMins / 60);
-          if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
-          const diffDays = Math.floor(diffHours / 24);
-          return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        }
-
-        function updateUI(data) {
-          const lastUpdate = document.getElementById("lastUpdate");
-          lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
-
-          const buttons = document.querySelectorAll("#floor-buttons button");
-          buttons.forEach(btn => {
-            if (btn.dataset.label == data.floor) {
-              btn.classList.add("active");
-              btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment + " • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
-            } else {
-              btn.classList.remove("active");
-              btn.textContent = btn.dataset.label;
-            }
-          });
-        }
-
-        onSnapshot(parkingRef, (snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            updateUI({
-              floor: data.floor,
-              comment: data.comment,
-              updatedBy: data.updatedBy,
-              updatedAt: new Date(data.updatedAt.seconds * 1000)
-            });
-          }
-        });
-      }
+    function timeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "just now";
+      if (diffMins < 60) return `${diffMins} min ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     }
+
+    const userSelect = document.getElementById("userSelect");
+    const savedUser = localStorage.getItem("user-teemo");
+    if (savedUser) userSelect.value = savedUser;
+    userSelect.addEventListener("change", () => {
+      localStorage.setItem("user-teemo", userSelect.value);
+    });
+
+    window.openConfirm = function(floor) {
+      pendingFloor = floor;
+      document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
+      document.getElementById("confirmComment").value = "";
+      document.getElementById("confirmModal").style.display = "flex";
+    }
+
+    window.closeConfirm = function() {
+      document.getElementById("confirmModal").style.display = "none";
+    }
+
+    window.confirmSelection = async function() {
+      const comment = document.getElementById("confirmComment").value;
+      const updatedBy = userSelect.value;
+      const updatedAt = new Date();
+
+      updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
+      document.getElementById("confirmModal").style.display = "none";
+
+      await setDoc(docRef, {
+        floor: pendingFloor,
+        comment: comment,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+    }
+
+    function updateUI(data) {
+      const lastUpdate = document.getElementById("lastUpdate");
+      lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
+
+      const buttons = document.querySelectorAll("#floor-buttons button");
+      buttons.forEach(btn => {
+        if (btn.dataset.label == data.floor) {
+          btn.classList.add("active");
+          btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment + " • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
+        } else {
+          btn.classList.remove("active");
+          btn.textContent = btn.dataset.label;
+        }
+      });
+    }
+
+    onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        updateUI({
+          floor: data.floor,
+          comment: data.comment,
+          updatedBy: data.updatedBy,
+          updatedAt: new Date(data.updatedAt.seconds * 1000)
+        });
+      }
+    });
   </script>
 </body>
 </html>
