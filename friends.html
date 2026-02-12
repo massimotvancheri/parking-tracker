@@ -329,16 +329,29 @@
       });
     }
 
+    let lastData = null;
+
     onSnapshot(docRef, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        updateUI({
+        lastData = {
           floor: data.floor,
           comment: data.comment,
           updatedBy: data.updatedBy,
           updatedAt: new Date(data.updatedAt.seconds * 1000)
-        });
+        };
+        updateUI(lastData);
       }
+    });
+
+    // Refresh "time ago" every 60 seconds
+    setInterval(() => {
+      if (lastData) updateUI(lastData);
+    }, 60000);
+
+    // Refresh when app comes back to foreground (iOS PWA)
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && lastData) updateUI(lastData);
     });
   </script>
 </body>
