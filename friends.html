@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- ✏️ EDIT TITLE HERE -->
+  <title>🚗 Friend's Parking Tracker</title>
+
+  <meta name="theme-color" content="#d6cec3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #d6cec3;
+      color: #3f3b37;
+    }
+
+    .app-container {
+      height: 100%;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding: 10px;
+    }
+
+    .safe-top {
+      padding-top: env(safe-area-inset-top);
+      flex-shrink: 0;
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+      flex-shrink: 0;
+    }
+
+    h1 { 
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 10px 0 5px 0;
+    }
+
+    .card {
+      background: #e6dfd6;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .section-label {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .floor-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .floor-buttons button {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      opacity: 0.6;
+    }
+
+    .floor-buttons button.active {
+      opacity: 1;
+      box-shadow: 0 0 12px rgba(0,0,0,0.25);
+      transform: scale(1.02);
+    }
+
+    .floor-buttons button .last-info {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: normal;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    .floor-6 { background-color: #B55239; }
+    .floor-5 { background-color: #D9822B; }
+    .floor-4 { background-color: #D6A941; color: #000; }
+    .floor-3 { background-color: #6B8E23; }
+    .floor-2 { background-color: #4C6A92; }
+    .floor-other { background-color: #5A5A5A; }
+
+    .divider {
+      border-top: 2px solid #b8b2ab;
+      margin: 10px 0;
+    }
+
+    .bottom {
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .note { 
+      color: #5c564f; 
+      font-size: 0.9rem; 
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .user-select label {
+      margin-right: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .user-select select {
+      font-size: 16px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      background: #f0e8df;
+      color: #3f3b37;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #e6dfd6;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-sizing: border-box;
+    }
+
+    .modal-content h2 {
+      margin: 0;
+      color: #3f3b37;
+    }
+
+    .modal-content input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      width: 100%;
+      box-sizing: border-box;
+      background: #f0e8df;
+      color: #3f3b37;
+      font-size: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn { background: #8c8176; color: #f5f3ef; } 
+    .confirm-btn:hover { background: #6f655d; }
+    .cancel-btn { background: #d6cec3; color: #3f3b37; border: 1px solid #aaa; } 
+    .cancel-btn:hover { background: #c5bcb2; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="safe-top">
+      <!-- ✏️ EDIT TITLE HERE -->
+      <h1>🚗 Friend's Parking Tracker</h1>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Where's the car?</div>
+      <div id="floor-buttons" class="floor-buttons">
+        <button class="floor-6" data-label="6" onclick="openConfirm(6)">6</button>
+        <button class="floor-5" data-label="5" onclick="openConfirm(5)">5</button>
+        <button class="floor-4" data-label="4" onclick="openConfirm(4)">4</button>
+        <button class="floor-3" data-label="3" onclick="openConfirm(3)">3</button>
+        <button class="floor-2" data-label="2" onclick="openConfirm(2)">2</button>
+        <div class="divider"></div>
+        <button class="floor-other" data-label="Other" onclick="openConfirm('Other')">Other</button>
+      </div>
+    </div>
+
+    <div class="bottom safe-bottom">
+      <span id="lastUpdate" class="note">No updates yet.</span>
+      <div class="user-select">
+        <label for="userSelect">Updated by</label>
+        <!-- ✏️ EDIT USER NAMES HERE -->
+        <select id="userSelect">
+          <option value="Friend1">Friend1</option>
+          <option value="Friend2">Friend2</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <h2 id="confirmTitle">Confirm Floor</h2>
+      <input type="text" id="confirmComment" placeholder="Optional comment">
+      <div class="modal-buttons">
+        <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
+        <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaV6PpoqxK0-t-Y2-V1lm9cdK0UlEuT5g",
+      authDomain: "parking-tracker-a0f43.firebaseapp.com",
+      projectId: "parking-tracker-a0f43",
+      storageBucket: "parking-tracker-a0f43.appspot.com",
+      messagingSenderId: "807627988635",
+      appId: "1:807627988635:web:96653e2887c6b2778cb03e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ✏️ EDIT GROUP ID HERE — must be unique per group
+    const docRef = doc(db, "parking", "friends");
+
+    let pendingFloor = null;
+
+    function timeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "just now";
+      if (diffMins < 60) return `${diffMins} min ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    }
+
+    const userSelect = document.getElementById("userSelect");
+    const savedUser = localStorage.getItem("user-friends");
+    if (savedUser) userSelect.value = savedUser;
+    userSelect.addEventListener("change", () => {
+      localStorage.setItem("user-friends", userSelect.value);
+    });
+
+    window.openConfirm = function(floor) {
+      pendingFloor = floor;
+      document.getElementById("confirmTitle").textContent = `Confirm Floor ${floor}`;
+      document.getElementById("confirmComment").value = "";
+      document.getElementById("confirmModal").style.display = "flex";
+    }
+
+    window.closeConfirm = function() {
+      document.getElementById("confirmModal").style.display = "none";
+    }
+
+    window.confirmSelection = async function() {
+      const comment = document.getElementById("confirmComment").value;
+      const updatedBy = userSelect.value;
+      const updatedAt = new Date();
+
+      updateUI({ floor: pendingFloor, comment, updatedBy, updatedAt });
+      document.getElementById("confirmModal").style.display = "none";
+
+      await setDoc(docRef, {
+        floor: pendingFloor,
+        comment: comment,
+        updatedBy: updatedBy,
+        updatedAt: updatedAt
+      });
+    }
+
+    function updateUI(data) {
+      const lastUpdate = document.getElementById("lastUpdate");
+      lastUpdate.textContent = `Last updated by ${data.updatedBy} ${timeAgo(data.updatedAt)}`;
+
+      const buttons = document.querySelectorAll("#floor-buttons button");
+      buttons.forEach(btn => {
+        if (btn.dataset.label == data.floor) {
+          btn.classList.add("active");
+          btn.innerHTML = `車 – ${data.floor}<span class="last-info">${data.comment ? data.comment + " • " : ""}by ${data.updatedBy} • ${timeAgo(data.updatedAt)}</span>`;
+        } else {
+          btn.classList.remove("active");
+          btn.textContent = btn.dataset.label;
+        }
+      });
+    }
+
+    onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        updateUI({
+          floor: data.floor,
+          comment: data.comment,
+          updatedBy: data.updatedBy,
+          updatedAt: new Date(data.updatedAt.seconds * 1000)
+        });
+      }
+    });
+  </script>
+</body>
+</html>
